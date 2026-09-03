@@ -1,0 +1,7 @@
+name = "citylegend-telegram-api-relay"
+main = "src/index.js"
+compatibility_date = "2025-03-01"
+
+# Секреты (обязательно после первого деплоя):
+#   npx wrangler secret put BOT_TOKEN
+#   npx wrangler secret put RELAY_SECRET

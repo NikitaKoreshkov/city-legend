@@ -1,0 +1,582 @@
+@import "tailwindcss";
+
+:root {
+  /* Fallback до измерения шапки (Header задаёт точное значение в px). */
+  --cl-header-offset: 118px;
+  /* Brand colors - Тихая роскошь */
+  --color-marble-white: #FFFFFF;
+  --color-classic-black: #000000;
+  --color-marble-grey-light: #D1D0D0;
+  --color-marble-grey-regular: #808080;
+  --color-marble-grey-dark: #696969;
+  /* Акцент навигации в юридических страницах (в тон футера) */
+  --color-brand-green-dark: #0b2a24;
+  
+  /* Legacy variables for compatibility */
+  --background: var(--color-marble-white);
+  --foreground: var(--color-classic-black);
+}
+
+@theme inline {
+  /* Colors */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-marble-white: var(--color-marble-white);
+  --color-classic-black: var(--color-classic-black);
+  --color-marble-grey-light: var(--color-marble-grey-light);
+  --color-marble-grey-regular: var(--color-marble-grey-regular);
+  --color-marble-grey-dark: var(--color-marble-grey-dark);
+  
+  /* Fonts */
+  --font-heading: var(--font-playfair-display);
+  --font-body: var(--font-open-sans);
+  --font-sans: var(--font-open-sans);
+}
+
+html {
+  /* overflow-x: hidden удален - ломает position: sticky! */
+  width: 100%;
+}
+
+body {
+  background: var(--color-marble-white);
+  color: var(--color-classic-black);
+  font-family: var(--font-open-sans), sans-serif;
+  /* overflow-x: hidden удален - ломает position: sticky! */
+  width: 100%;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Ниже первого экрана: откладывает layout/paint блоков до прокрутки (особенно на мобильных). */
+.home-below-fold {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 1800px;
+}
+
+/* iOS: не увеличивать страницу при фокусе на полях с мелким шрифтом */
+@media (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: max(1rem, 100%);
+  }
+}
+
+/* Glassmorphism эффект для хеддера */
+.glass-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  /* Принудительное применение backdrop-filter */
+  backdrop-filter: blur(80px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(80px) saturate(180%) !important;
+}
+
+/* На узких экранах blur сильно грузит GPU — ниже радиус, тот же визуальный характер */
+@media (max-width: 767px) {
+  .glass-header {
+    backdrop-filter: blur(24px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(140%) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .magnifying-glass .rotating-ring,
+  .zoom-rotating-ring {
+    animation: none !important;
+  }
+
+  .glass-header {
+    backdrop-filter: blur(12px) saturate(120%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(120%) !important;
+  }
+}
+
+/* Эффект подчеркивания: появляется слева направо, исчезает справа налево */
+.nav-link-underline {
+  transform-origin: right;
+  transform: scaleX(0);
+  opacity: 0;
+  visibility: hidden;
+  transition: transform 0.3s ease, opacity 0.3s ease, visibility 0s 0.3s;
+}
+
+.group:hover .nav-link-underline {
+  transform-origin: left;
+  transform: scaleX(1);
+  opacity: 1;
+  visibility: visible;
+  transition: transform 0.3s ease, opacity 0.3s ease, visibility 0s 0s;
+}
+
+/* Плавная анимация раскрытия поиска в хеддере */
+.search-container {
+  will-change: opacity, transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+.search-container-open {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              visibility 0s,
+              pointer-events 0s;
+}
+
+.search-container-closed {
+  opacity: 0;
+  transform: translateY(-20px);
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.55, 0.06, 0.68, 0.19),
+              transform 0.3s cubic-bezier(0.55, 0.06, 0.68, 0.19),
+              visibility 0s 0.3s,
+              pointer-events 0s 0.3s;
+}
+
+/* Плавная анимация элементов хедера при поиске */
+.header-search-input {
+  transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: opacity, transform;
+}
+
+.header-search-input-enter {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.header-search-input-exit {
+  opacity: 0;
+  transform: translateX(-20px);
+  pointer-events: none;
+}
+
+.header-nav-links {
+  transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: opacity, transform;
+}
+
+.header-nav-links-enter {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.header-nav-links-exit {
+  opacity: 0;
+  transform: translateX(20px);
+  pointer-events: none;
+}
+
+.header-icon-button {
+  transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              background-color 0.2s ease;
+  will-change: opacity, transform;
+  border-radius: 9999px;
+}
+.header-icon-button:hover {
+  background-color: rgba(11, 42, 36, 0.08);
+}
+.header-icon-button:active {
+  transform: scale(0.92);
+  background-color: rgba(11, 42, 36, 0.12);
+}
+
+.mobile-icon-button {
+  transition: opacity 0.2s ease, transform 0.15s ease, background-color 0.2s ease;
+  border-radius: 9999px;
+}
+.mobile-icon-button:hover {
+  background-color: rgba(11, 42, 36, 0.08);
+}
+.mobile-icon-button:active {
+  transform: scale(0.92);
+  background-color: rgba(11, 42, 36, 0.12);
+}
+
+.header-icon-button-enter {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+  pointer-events: auto;
+}
+
+.header-icon-button-exit {
+  opacity: 0;
+  transform: scale(0.7) rotate(-90deg);
+  pointer-events: none;
+}
+
+.header-icon-button-exit:active {
+  transform: scale(0.7) rotate(-90deg);
+}
+
+/* Корзина + кабинет: сходятся к центру, крестик без pill-фона */
+.header-utility-icon {
+  transition: opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 9999px;
+}
+.header-utility-icon:hover {
+  opacity: 0.7;
+}
+.header-utility-close {
+  transition: opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.header-utility-close:hover {
+  opacity: 0.7;
+}
+
+/* Плавная анимация скрытия/показа хедера при скролле */
+.header-scroll {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+}
+
+/* Оптимизация для sticky stacking панелей */
+.sticky {
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Исправление overflow для sticky элементов */
+section {
+  overflow: visible !important;
+  position: relative;
+}
+
+/* Убеждаемся, что родительские элементы не блокируют sticky */
+#__next,
+[data-nextjs-scroll-focus-boundary] {
+  /* overflow удален полностью */
+}
+
+/* Убеждаемся, что grid контейнеры не блокируют sticky */
+.grid {
+  overflow: visible !important;
+}
+
+/* Убеждаемся, что контейнеры не блокируют sticky */
+.container {
+  overflow: visible !important;
+}
+
+/* Убеждаемся, что div контейнеры не блокируют sticky */
+div[style*="overflow"] {
+  /* Не переопределяем, если уже установлен overflow */
+}
+
+/* Убеждаемся, что grid item не блокирует sticky */
+.grid > div {
+  overflow: visible !important;
+}
+
+/* Эффект для категорий - дефисы исчезают, линия появляется при наведении на текст */
+.category-title {
+  position: relative;
+  display: inline-block;
+}
+
+.category-dash {
+  opacity: 1;
+  transition: opacity 0.7s ease-in-out;
+}
+
+.category-title:hover .category-dash {
+  opacity: 0;
+}
+
+.category-underline {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: #000000;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.7s ease-in-out;
+}
+
+.category-title:hover .category-underline {
+  transform: scaleX(1);
+}
+
+/* Плавная анимация боковой панели фильтров */
+.filters-panel-overlay {
+  opacity: 0;
+  transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: opacity;
+}
+
+.filters-panel-overlay-enter {
+  opacity: 1;
+}
+
+.filters-panel {
+  transform: translateX(100%);
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.filters-panel-enter {
+  transform: translateX(0);
+}
+
+/* Плавная анимация панели сортировки */
+.sort-panel {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+  visibility: hidden;
+  transition: opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              visibility 0s 0.3s;
+  will-change: opacity, transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.sort-panel-enter {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  visibility: visible;
+  transition: opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              visibility 0s;
+}
+
+/* Плавная анимация раскрытия подкатегорий */
+.subcategories-list {
+  transition: max-height 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              padding 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: max-height, opacity, padding;
+  overflow: hidden;
+}
+
+.subcategories-list-enter {
+  max-height: 1000px;
+  opacity: 1;
+  padding-top: 1rem;
+}
+
+.subcategories-list-exit {
+  max-height: 0;
+  opacity: 0;
+  padding-top: 0;
+}
+
+/* Плавная анимация для кнопок и элементов */
+.filter-button {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform, background-color, color;
+}
+
+.filter-button:hover {
+  transform: translateX(4px);
+}
+
+.filter-checkbox-label {
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform, opacity;
+}
+
+.filter-checkbox-label:hover {
+  transform: translateX(4px);
+  opacity: 0.8;
+}
+
+/* Плавная анимация для знака + и - */
+.filter-expand-icon {
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform, opacity;
+  display: inline-block;
+}
+
+/* Плавная анимация для кнопки "Показать проектов" */
+.show-products-button {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform, background-color, box-shadow;
+}
+
+.show-products-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(11, 42, 36, 0.28);
+}
+
+.show-products-button:active {
+  transform: translateY(0);
+}
+
+/* Плавные анимации для модального окна с лупой */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.zoom-modal-enter {
+  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.zoom-image-enter {
+  /* Плавное появление через opacity */
+  opacity: 0;
+  animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Плавные переходы для sticky панели */
+.sticky-info-panel {
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Плавные анимации для фотографий */
+.product-image {
+  transition: opacity 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: opacity;
+}
+
+/* Скрытие курсора мыши на фотографиях */
+.image-container {
+  cursor: none;
+}
+
+/* Плавная анимация иконки лупы */
+.zoom-icon {
+  transition: opacity 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: opacity, transform;
+}
+
+/* Анимация вращения для внешнего кольца лупы */
+@keyframes rotateRing {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.magnifying-glass {
+  will-change: transform, opacity;
+  transform: translate(-50%, -50%);
+  transition:
+    opacity 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  overflow: visible;
+  isolation: isolate;
+}
+
+.magnifying-glass-hidden {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0);
+  pointer-events: none;
+}
+
+.magnifying-glass-visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  pointer-events: none;
+}
+
+.magnifying-glass .rotating-ring {
+  animation: rotateRing 8s linear infinite;
+}
+
+/* Вращение кольца в модальном окне с зумом */
+.zoom-rotating-ring {
+  animation: rotateRing 3s linear infinite;
+}
+
+/* Включаем поддержку backdrop-filter глобально */
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .glass-effect-enabled {
+    backdrop-filter: blur(20px) brightness(1.3) saturate(1.5);
+    -webkit-backdrop-filter: blur(20px) brightness(1.3) saturate(1.5);
+  }
+}
+
+/* Плавная анимация для миниатюр в модальном окне */
+.thumbnail-button {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform, opacity, border-color;
+  cursor: pointer;
+}
+
+.thumbnail-button:hover {
+  transform: scale(1.1);
+}
+
+/* Плавная анимация для кнопки закрытия модалок */
+.close-button {
+  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+  will-change: transform;
+  cursor: pointer !important;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0.2);
+  touch-action: manipulation;
+}
+
+.close-button:hover {
+  transform: scale(1.08);
+  background: rgba(255, 255, 255, 0.28) !important;
+  border-color: rgba(255, 255, 255, 0.65) !important;
+}
+
+.close-button:active {
+  transform: scale(0.94);
+  background: rgba(255, 255, 255, 0.38) !important;
+}
+
+/* Интерактивные иконки и крестики — hover на десктопе, active на тач-устройствах */
+.icon-btn-interactive {
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+}
+.icon-btn-interactive:hover {
+  opacity: 0.85;
+}
+.icon-btn-interactive:active {
+  transform: scale(0.94);
+  opacity: 0.75;
+}
+
+.menu-arrow {
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+.group:hover .menu-arrow,
+.group:active .menu-arrow {
+  transform: translateX(0.5rem);
+}
+

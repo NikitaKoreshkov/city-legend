@@ -1,0 +1,10 @@
+# Папка для документов
+
+Размещайте PDF и другие файлы документов в этой папке.
+
+Пример:
+- /public/documents/archive-23-12-2025.pdf
+- /public/documents/protocol-570.pdf
+
+Эти файлы будут доступны по URL: /documents/имя-файла.pdf
+
